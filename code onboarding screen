@@ -1,0 +1,350 @@
+<!-- Fe02 (03-04-2022) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" integrity="sha512-tS3S5qG0BlhnQROyJXvNjeEM4UpMXHrQfTGmbQ1gKmelCxlSEBUaxhRBj/EFTzpbP4RVSrpEikbmdJobCvhE3g==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+<div class="customer_product_review" id="customer_product_review">
+  <input type="hidden" id="review_settings" class="review_settings" value="">
+  <form action="" method="post" id="customer_review">
+      <input type="hidden" name="shop_url" value="{{shop.url}}">
+      <input type="hidden" name="product_id" value="{{product.id}}">
+  </form>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js" integrity="sha512-bPs7Ae6pVvhOSiIcyUClR7/q2OAsRiovw4vAkX+zJbw3ShAeeqezq50RIIcIURq7Oa20rW2n2q+fyXBNcU9lrw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<style>
+  
+  
+</style>
+<script>
+  
+  var avgStarCount = 0;
+  var totReviews = 0; 
+  var settings;
+  var layoutType; 
+
+  function appendData(){
+      var data = $( "#customer_review" ).find("input").serialize();
+      $.ajax({
+        type: "POST",
+        url: 'https://waltt-review-server.herokuapp.com/get_product_review',
+        async : false,
+        dataType: 'json',
+        data: data,
+        success:function(obj) {
+            if(obj){
+                var nietos = [];
+                $.each(obj.data, function( key, item ) {
+                  nietos.push(JSON.parse(item.product_review));
+                });
+
+                if(nietos.length !== 0){
+                    settings = JSON.parse($('.review_settings').val());   
+                    layoutType = settings.layoutType; 
+                    var htmlContent = '<div id="review_body_1010_type2" class="reviewSlider '+nietos.length+'" starBgColor = "'+settings.starBgCol+'" actStarBgColor="'+settings.selectedStarBgCol+'" data-loop="'+settings.autoLoop+'" data-loop-duration="'+settings.autoLoopDuration+'" data-arrow="'+settings.arrowType+'" data-stars="'+settings.starType+'">'
+                                        + '<div class="reviewPage-topSvg"><svg version="1.1" id="Arrow-Template" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 2000 85" style="enable-background:new 0 0 2000 85;" xml:space="preserve"><polygon points="0,0 0,85 2000,85 2000,0 1000.2,82 "></polygon></svg></div>'
+                                        + '<div class="reviewSlider-Wrapper">'
+                                        + '<div class="reviewSlider-header">'
+                                            +'<button class="leaveReviewBtn modal-toggle">Leave a Review</button>'
+                                            + '<'+settings.headerTag+' class="header-title">'+settings.headerText+'</'+settings.headerTag+'>'
+                                            + '<div class="header-description">'
+                                            + '<span class="starRatings"></span><span><a>Based on '+nietos.length+' reviews</a></span><span class="writeReview"><a>Write a review</a></span>'
+                                            +'</div>'
+                                            + '<span class="cv__line"></span>'
+                                        + '</div>'
+                                        + '<div class="reviewSlider-content">'                							
+                                            + '<div class="content-reviews owl-carousel owl-theme">';
+
+                    var totstarCount = 0; 
+                  	totReviews = nietos.length; 
+                    $.each(nietos, function( key, item ){
+
+                      var num = parseInt(item.rating ? item.rating : 0);
+
+                      totstarCount += num; 
+                      var ext = item.image_url.substring(item.image_url.lastIndexOf(".")+1); 
+                      if(ext == 'jpg' || ext == 'jpeg' || ext == 'gif' || ext == 'png'){
+                          var mediaFile = '<img src='+item.image_url+' alt='+key+' />'
+                      }else{
+                          var mediaFile = '<video autoPlay loop muted><source className="uploded_video_src" src='+item.vedio_url+'/></video>'
+                      }
+
+                      htmlContent += '<div class="reviews-item">'
+                                        +'<div class="item-image">'
+                                        + mediaFile
+                                        +'</div>'
+
+                                        +'<div class="review-item-content">'
+                                            +'<div class="item-header">'
+                                              +'<h3 class="item-header-title">'+item.title+'</h3>'
+                                              +'<span class="item-header-authorName">' + item.author + ''
+                                              +'<span class="item-header-verified">'
+                                              +'<i class="fa fa-check-circle"></i>verified'
+                                              +'</span>'
+                                              +'</span>'
+
+                                              +'<div class="starRatings" data-colorCount="'+item.rating+'" data-color="'+settings.starBgCol+'" data-bgColor = "'+settings.selectedStarBgCol+'"></div>'
+                                            +'</div>'
+                                            +'<div class="item-content">'
+                                            +'<div class="item-content-wrap">' + item.body + '</div>'
+                                              + '<div class="item-content-scroll"><span class="item-content-scroll-btn"><svg class="Icon Icon--arrow-bottom" role="presentation" viewBox="0 0 21 11"> <polyline fill="none" stroke="currentColor" points="0.5 0.5 10.5 10.5 20.5 0.5" stroke-width="1.25"></polyline> </svg></span></div>'
+                                              + '<div class="slide_below_bg"><div class="slide_below_wrap"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 514 50"><defs><radialGradient id="dropshadow_2-ab" cx="50.146%" cy="0%" r="512.498%" fx="50.146%" fy="0%" gradientTransform="matrix(.09728 0 0 .09928 .453 0)"><stop offset="0%" stop-opacity=".8"/><stop offset="35.487%" stop-opacity=".5"/><stop offset="71.351%" stop-opacity=".25"/><stop offset="100%" stop-opacity="0"/></radialGradient></defs><rect width="514" height="50" fill="url(#dropshadow_2-ab)" fill-rule="evenodd" style=" fill: url(#dropshadow_2-ab); "/></svg></div></div>'
+                                            +'</div>'
+                                        +'</div>'
+                                    +'</div>';
+
+                    });
+
+                    avgStarCount = (totstarCount / nietos.length).toFixed(0); 
+					
+                    htmlContent += '</div> </div></div> </div>'; 
+                
+                    $('#customer_product_review').append(htmlContent);
+                    document.querySelector('.stars-inner').style.width = (avgStarCount * 25)+'px'; 
+                    var startype = $('.reviewSlider').attr('data-stars');
+                    starType(startype);
+                }
+            }  
+        }  
+        });
+
+        var starRatings = $('.starRatings'); 
+        setTimeout(function(){
+            var likeCount, Color, inherit; 
+            $(".starRatings").each(function(index, element, like_count){
+                  likeCount = $(this).attr('data-colorCount'); 
+                  Color = $(this).attr('data-bgColor');
+                  inherit = $(this).attr('data-color');
+
+                  $(this).find('svg *').css("fill", inherit);           
+
+                  if(likeCount == 1){
+                    $(this).find('svg:nth-child(1) *').css("fill", Color);
+                  } else if(likeCount == 2){
+                    $(this).find('svg:nth-child(1) *').css("fill", Color);           
+                    $(this).find('svg:nth-child(2) *').css("fill", Color);           
+                  }  else if(likeCount == 3){
+                    $(this).find('svg:nth-child(1) *').css("fill", Color);           
+                    $(this).find('svg:nth-child(2) *').css("fill", Color);           
+                    $(this).find('svg:nth-child(3) *').css("fill", Color);           
+                  }  else if(likeCount == 4){
+                    $(this).find('svg:nth-child(1) *').css("fill", Color);           
+                    $(this).find('svg:nth-child(2) *').css("fill", Color);           
+                    $(this).find('svg:nth-child(3) *').css("fill", Color);           
+                    $(this).find('svg:nth-child(4) *').css("fill", Color);           
+                  }  else if(likeCount == 5){
+                    $(this).find('svg:nth-child(1) *').css("fill", Color);           
+                    $(this).find('svg:nth-child(2) *').css("fill", Color);           
+                    $(this).find('svg:nth-child(3) *').css("fill", Color);           
+                    $(this).find('svg:nth-child(4) *').css("fill", Color);           
+                    $(this).find('svg:nth-child(5) *').css("fill", Color);           
+                  }
+            }); 
+
+            $('.header-description').find('svg *').css("fill", inherit); 
+
+                if(avgStarCount == 1){
+                  $('.header-description').find('svg:nth-child(1) *').css("fill", Color); 
+                } else if(avgStarCount == 2){
+                  $('.header-description').find('svg:nth-child(1) *').css("fill", Color); 
+                  $('.header-description').find('svg:nth-child(2) *').css("fill", Color);         
+                } else if(avgStarCount == 3){
+                  $('.header-description').find('svg:nth-child(1) *').css("fill", Color); 
+                  $('.header-description').find('svg:nth-child(2) *').css("fill", Color);         
+                  $('.header-description').find('svg:nth-child(3) *').css("fill", Color);         
+                } else if(avgStarCount == 4){
+                  $('.header-description').find('svg:nth-child(1) *').css("fill", Color); 
+                  $('.header-description').find('svg:nth-child(2) *').css("fill", Color);         
+                  $('.header-description').find('svg:nth-child(3) *').css("fill", Color);         
+                  $('.header-description').find('svg:nth-child(4) *').css("fill", Color);         
+                } else if(avgStarCount == 5){
+                  $('.header-description').find('svg:nth-child(1) *').css("fill", Color); 
+                  $('.header-description').find('svg:nth-child(2) *').css("fill", Color);         
+                  $('.header-description').find('svg:nth-child(3) *').css("fill", Color);         
+                  $('.header-description').find('svg:nth-child(4) *').css("fill", Color);         
+                  $('.header-description').find('svg:nth-child(5) *').css("fill", Color);         
+                }
+
+      }, 1000); 
+  }
+
+  async function owlSlider(){
+    var type = $('.reviewSlider').attr('data-arrow'); 
+    var startype = $('.reviewSlider').attr('data-stars'); 
+    var owl_custom_arrow = arrowType(type);
+    var starRatingsIcon = starType(startype ? startype : 'type1');
+	
+	
+    $(".content-reviews").owlCarousel({
+      center: totReviews > 3 ? false : true, 
+      loop: totReviews > 3 ? true : false, 
+      items: 3,
+      autoPlay: true,
+      dotsEach: true,
+      lazyLoad: true, 
+      margin: 0, 
+      nav: true, 
+      responsive: {
+        0: {items: 1}, 
+        768: {items: layoutType == 'layouttype1' ? 2 : 3}, 
+        1024: {items: layoutType == 'layouttype1' ? 3 : 5} 
+      }  
+    });
+    $(".owl-nav span").remove(); 
+    $(".owl-nav button").empty(); 
+    $(".owl-nav button").append(owl_custom_arrow);
+    $('.starRatings').append(starRatingsIcon+starRatingsIcon+starRatingsIcon+starRatingsIcon+starRatingsIcon);
+	
+    setTimeout(function(){
+      console.log(starRatingsIcon);
+        $('.starLabel').append(starRatingsIcon);
+        if(starRatingsIcon != undefined) {
+            $('.product_title_star_ratings').append(starRatingsIcon+starRatingsIcon+starRatingsIcon+starRatingsIcon+starRatingsIcon);
+            $('.product_title_star_count').text("");
+            $('.product_title_star_count').append(''+totReviews+' reviews'); 
+            $('.product-single__title').append("<div class='starRating-Wrapper'><div class='starRatings'>"+starRatingsIcon+starRatingsIcon+starRatingsIcon+starRatingsIcon+starRatingsIcon+"</div><span class='starRating-count'>"+totReviews+" reviews</span></div>");
+        }
+        
+    },1000);	
+
+       $('.starRatings svg *').css("fill", settings.starBgCol);
+
+    if(avgStarCount == 1){
+      $('.starRating-Wrapper').find('svg:nth-child(1) *').css("fill", settings.selectedStarBgCol); 
+    } else if(avgStarCount == 2){
+      $('.starRating-Wrapper').find('svg:nth-child(1) *').css("fill", settings.selectedStarBgCol); 
+      $('.starRating-Wrapper').find('svg:nth-child(2) *').css("fill", settings.selectedStarBgCol);         
+    } else if(avgStarCount == 3){
+      $('.starRating-Wrapper').find('svg:nth-child(1) *').css("fill", settings.selectedStarBgCol); 
+      $('.starRating-Wrapper').find('svg:nth-child(2) *').css("fill", settings.selectedStarBgCol);         
+      $('.starRating-Wrapper').find('svg:nth-child(3) *').css("fill", settings.selectedStarBgCol);         
+    } else if(avgStarCount == 4){
+      $('.starRating-Wrapper').find('svg:nth-child(1) *').css("fill", settings.selectedStarBgCol); 
+      $('.starRating-Wrapper').find('svg:nth-child(2) *').css("fill", settings.selectedStarBgCol);         
+      $('.starRating-Wrapper').find('svg:nth-child(3) *').css("fill", settings.selectedStarBgCol);         
+      $('.starRating-Wrapper').find('svg:nth-child(4) *').css("fill", settings.selectedStarBgCol);         
+    } else if(avgStarCount == 5){
+      $('.starRating-Wrapper').find('svg:nth-child(1) *').css("fill", settings.selectedStarBgCol); 
+      $('.starRating-Wrapper').find('svg:nth-child(2) *').css("fill", settings.selectedStarBgCol);         
+      $('.starRating-Wrapper').find('svg:nth-child(3) *').css("fill", settings.selectedStarBgCol);         
+      $('.starRating-Wrapper').find('svg:nth-child(4) *').css("fill", settings.selectedStarBgCol);         
+      $('.starRating-Wrapper').find('svg:nth-child(5) *').css("fill", settings.selectedStarBgCol);         
+    }
+
+  }
+
+  function setting(){
+    var data = $("#customer_review" ).find("input").serialize();
+    $.ajax({
+      type: "POST",
+      url: 'https://waltt-review-server.herokuapp.com/get_store_details',
+      async : false,
+      dataType: 'json',
+      data: data,
+      success:function(obj) {
+        var settings = obj.data.settings;
+        var style = JSON.parse(obj.data.css_content);
+        $('#review_settings').val(settings);
+        $('#customer_product_review').append(style);
+      }  
+    });
+
+
+  }
+
+  function arrowType(type){
+          if (type == "arrow1") {
+                 var owl_custom_arrow = "<svg version='1.1' id='Calque_3' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 595.28 841.89' enable-background='new 0 0 595.28 841.89' xml:space='preserve'><path d='M306.069,171.713L56.834,420.942l249.235,249.235l53.216-53.222L163.272,420.942l196.012-195.639 L306.069,171.713z M484.089,171.713L235.236,420.942l248.853,249.235l53.598-53.222L341.674,420.942l196.013-195.639 L484.089,171.713z'/></svg>";
+          } else if (type == "arrow2") {
+                 var owl_custom_arrow = "<svg version='1.1' id='Calque_3' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 595.28 841.89' enable-background='new 0 0 595.28 841.89' xml:space='preserve'><polygon fill='#111' points='56.703,420.972 462.036,826.314 538.597,749.753 210.286,420.972 538.597,92.668 462.036,15.638 '/></svg>"
+          } else if (type == "arrow3") { 
+                 var owl_custom_arrow = "<svg version='1.1' id='Calque_3' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 595.28 841.89' enable-background='new 0 0 595.28 841.89' xml:space='preserve'><g id='Calque_1_1_'><path fill='#111' d='M325.989,319.384l-99.527,99.526c-1.125,1.126-1.125,3.002,0,4.134l99.527,99.151 c1.125,1.126,3.014,1.126,3.764,0l22.152-21.782l-77.738-77.369c-1.125-1.131-1.125-3.008,0-4.134l77.738-77.369l-22.152-22.157 C329.004,318.257,327.114,318.257,325.989,319.384L325.989,319.384z M297.446,180.044c-66.467,0-126.569,27.042-170.134,70.608 c-43.566,43.566-70.609,103.66-70.609,170.133c0,66.481,27.044,126.944,70.609,170.515 c43.564,43.566,103.666,70.608,170.134,70.608c66.856,0,126.943-27.042,170.509-70.608c43.579-43.57,70.608-104.035,70.608-170.515 c0-66.473-27.029-126.568-70.608-170.134C424.389,207.086,364.302,180.044,297.446,180.044L297.446,180.044z M163.748,287.081 c34.172-34.178,81.502-55.585,133.698-55.585c52.583,0,99.901,21.408,134.086,55.585c34.172,34.178,55.21,81.503,55.21,133.704 c0,52.208-21.039,99.526-55.21,134.08c-34.185,34.178-81.503,55.21-134.086,55.21c-52.197,0-99.526-21.032-133.698-55.21 c-34.185-34.553-55.21-81.871-55.21-134.08C108.537,368.584,129.563,321.26,163.748,287.081L163.748,287.081z'/></g></svg>"
+          } else if (type == "arrow4") {
+                 var owl_custom_arrow = "<svg version='1.1' id='Calque_3' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 595.28 841.89' enable-background='new 0 0 595.28 841.89' xml:space='preserve'><path d='M502.87,4.198l18.004,18.585L130.676,412.98c-4.66,4.642-4.66,12.192,0,16.834l390.198,390.197 l-18.004,18.583c-4.64,4.062-12.202,4.062-16.263,0L77.246,429.814c-4.06-4.642-4.06-12.192,0-16.834L486.608,4.198 C490.668-0.442,498.23-0.442,502.87,4.198L502.87,4.198z'/></svg>"
+          } else if (type == "arrow5") {
+                 var owl_custom_arrow = "<svg version='1.1' id='Calque_3' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 595.28 841.89' enable-background='new 0 0 595.28 841.89' xml:space='preserve'><polygon points='316.614,421.157 538.593,692.345 56.703,421.157 538.593,149.607 '/></svg>"
+          } else if (type == "arrow6") {
+                 var owl_custom_arrow = "<svg version='1.1' id='Calque_3' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 595.28 841.89' enable-background='new 0 0 595.28 841.89' xml:space='preserve'><path d='M239.809,606.063L58.266,424.535c-2.085-1.682-2.085-5.019,0-7.104l181.542-181.542 c2.085-2.085,5.005-2.085,7.089,0l23.378,23.378l-143.156,143.14h391.037c11.271,0,20.458,9.188,20.458,20.445l0,0 c0,10.855-9.186,20.041-20.458,20.041H130.47l139.805,139.807l-23.378,23.363C244.813,608.148,241.893,608.148,239.809,606.063 L239.809,606.063z'/></svg>"
+          } else if (type == "arrow7") {
+                 var owl_custom_arrow = "<svg version='1.1' id='Calque_3' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 595.28 841.89' enable-background='new 0 0 595.28 841.89' xml:space='preserve'><polygon points='278.131,644.671 538.593,644.027 315.227,424.743 538.593,197.219 282.062,197.865 56.716,423.257'/></svg>"
+          } else if (type == "arrow8") {
+                 var owl_custom_arrow = "<svg version='1.1' id='Calque_3' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 595.28 841.89' enable-background='new 0 0 595.28 841.89' xml:space='preserve'><path d='M433.538,667.31L304.604,415.752l128.934-251.571L56.703,415.753L433.538,667.31L433.538,667.31z M538.593,774.187l-61.476-353.21l61.476-353.273L358.895,420.975L538.593,774.187L538.593,774.187z'/></svg>"
+          } else if (type == "arrow9") {
+                 var owl_custom_arrow = "<svg version='1.1' id='Calque_3' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 595.28 841.89' enable-background='new 0 0 595.28 841.89' xml:space='preserve'><g><polygon  points='334.474,596.275 538.593,595.771 363.545,423.922 538.593,245.615 337.555,246.122 160.956,422.757 	'/><polygon points='230.197,596.275 280.343,596.146 106.953,422.757 283.552,246.122 233.279,246.122 56.678,422.757 '/></g></svg>"
+          }
+    return owl_custom_arrow;
+  }
+
+  function starType(type){
+
+    if (type == "type1") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_1" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve" fill="#F0C14C"><polygon points="50,75.9 80.3,96.2 70.4,61.1 99,38.6 62.6,37.1 50,3 37.4,37.1 1,38.6 29.6,61.1 19.7,96.2 "/></svg>';
+    } else if (type == "type2") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_2" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><g><polygon fill="#F0C14C" points="68.6,60.4 80.2,96 49.9,74 19.7,96 31.3,60.4 1,38.5 38.4,38.5 49.9,2.9 61.5,38.5 98.9,38.5 68.6,60.4 "/></g></svg>';
+    } else if (type == "type3") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_3" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve" fill="#F0C14C"><polygon points="98.9,38.5 65.1,33.6 49.9,2.9 34.8,33.6 1,38.5 25.5,62.3 19.7,96 49.9,80.1 80.2,96 74.4,62.3 "/></svg>';
+    } else if (type == "type4") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_4" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><g><path fill="#F0C14C" d="M54.8,5.7l10.8,21.8c0.8,1.6,2.4,2.8,4.2,3l24.1,3.5c4.6,0.7,6.4,6.3,3.1,9.5l-17.4,17c-1.3,1.3-1.9,3.1-1.6,4.9l4.1,24 c0.8,4.5-4,8-8.1,5.9L52.4,84c-1.6-0.9-3.6-0.9-5.2,0L25.7,95.3c-4.1,2.1-8.8-1.3-8.1-5.9l4.1-24c0.3-1.8-0.3-3.6-1.6-4.9l-17.4-17 c-3.3-3.2-1.5-8.8,3.1-9.5l24.1-3.5c1.8-0.3,3.4-1.4,4.2-3L44.8,5.7C46.9,1.5,52.8,1.5,54.8,5.7z"/></g></svg>';
+    } else if (type == "type5") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><path fill="#F0C14C" d="M52.1,5.1l9.8,30.1c0.3,1,1.3,1.7,2.4,1.7H96c2.4,0,3.4,3.1,1.5,4.5L71.8,60.1c-0.9,0.6-1.2,1.8-0.9,2.8l9.8,30.1 c0.7,2.3-1.9,4.2-3.8,2.8L51.2,77.2c-0.9-0.6-2.1-0.6-2.9,0L22.6,95.9c-2,1.4-4.6-0.5-3.8-2.8l9.8-30.1c0.3-1,0-2.2-0.9-2.8L2,41.5 c-2-1.4-1-4.5,1.5-4.5h31.7c1.1,0,2-0.7,2.4-1.7l9.8-30.1C48.1,2.8,51.4,2.8,52.1,5.1z"/></svg>';
+    } else if (type == "type6") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><style type="text/css"> .st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path fill="#F0C14C" class="st0" d="M51.4,4.6c-1.2,11.8-6.9,22.6-9.8,34l0,0l0,0l0,0l0,0h0l0,0l0,0l0,0l-3.1-0.4l0-0.4l0,0l0,0v0l0,0l0,0v0l0,0 l0,0l0,0v0l0,0c0.1-0.4,0-0.2,0.2-0.7c0,0,0-0.1,0-0.1c2.9-10.6,8.4-21.7,9.5-32.4C48.3,3.7,49,3,49.9,3C50.7,3,51.4,3.7,51.4,4.6 L51.4,4.6z M38.6,37.8L38.6,37.8l0,0.1L38.6,37.8z"/><path fill="#F0C14C" class="st0" d="M39.5,40.1c-9.9,0.5-25.1,2.2-34.5,0.6c-0.4,0.5-1.2,0.7-1.8,0.4c-0.6-0.3-1.3-0.6-1.7-1.1 c-1.9-2.7,2.1-2.7,3.9-2.4c9,1.6,24.4-0.1,34-0.6c0.9,0,1.6,0.6,1.6,1.5C41,39.4,40.4,40.1,39.5,40.1z"/><path fill="#F0C14C" class="st0" d="M3.6,39.3C6.4,40.9,30,56.9,31.2,58.4c0.9,0,1.6,0.7,1.6,1.6c0,0.9-0.7,1.6-1.6,1.6c-3.2-1.5-1.6-0.6-5.2-3.1 c-7.5-5.2-15.9-11.7-23.6-16.2c-0.8-0.3-1.2-1.2-0.9-2C1.9,39.4,2.8,39,3.6,39.3z"/><path fill="#F0C14C" class="st0" d="M32.8,60.7c-1.3,9.5-5.3,19-8.7,27.9c-0.4,1.1-0.6,1.7-0.7,2.1c0.5,0.1,0.9,0.5,1.1,1.1 c0.2,0.8-0.2,1.7-1.1,1.9c-3.1,1-4.4,0.1-3.4-3.2c3.1-10,8.1-19,9.7-29.8c0-0.9,0.7-1.6,1.6-1.6C32.1,59.2,32.8,59.9,32.8,60.7z"/><path fill="#F0C14C" class="st0" d="M22.7,91.7c2.4-1.7,4.8-4,7.6-5.9c2.3-1.5,19.3-13.7,20.1-13.7c1.6,0,1.9,1.7,1.8,2.9c0,0.9-0.7,1.5-1.6,1.5 c-0.4,0-0.7-0.1-0.9-0.3c-5.5,4.1-12.2,8.7-17.7,12.2c-3.3,2.1-5.4,4.4-8.2,6.2c-2.9,1.9-4.8,0.6-3.7-2.4c0.3-0.8,1.2-1.2,2-0.9 C22.4,91.5,22.6,91.6,22.7,91.7z"/><path fill="#F0C14C" class="st0" d="M51.6,73.5c7.6,6.2,17.8,11.4,25.6,17.8c0,0,1.5,1.5,2.5,2.2c0.5-0.2,1-0.1,1.5,0.2c0.7,0.5,0.8,1.5,0.3,2.2 c-1.3,1.4-2.7,0.9-3.9-0.2c-9-7.8-20.1-13.1-28.4-20.3c-0.5-0.7-0.4-1.6,0.2-2.2C50.1,72.7,51.1,72.8,51.6,73.5z"/><path fill="#F0C14C" class="st0" d="M70.1,60.4c0.9,5.5,9.6,29.9,12.8,34.4c0.5,0.4,0.7,1,0.6,1.6c-0.2,0.8-1,1.3-1.9,1.1 c-0.9-0.3-1.2-0.8-1.7-1.6c-4.2-7.2-12-28.2-12.9-36c0.1-0.8,0.9-1.4,1.8-1.3C69.6,58.8,70.2,59.6,70.1,60.4z"/><path fill="#F0C14C" class="st0" d="M97.9,40.2c-8.5,6.2-19.2,12.6-26.7,20c-0.5,0.7-1.5,0.8-2.2,0.2c-0.7-0.5-0.8-1.5-0.2-2.2 c7.2-7.1,18.6-14.5,27-20.2c0.6-0.6,1.6-0.6,2.2,0C98.5,38.6,98.5,39.6,97.9,40.2z"/><path fill="#F0C14C" class="st0" d="M52,4.7c2.2,8.6,6.1,15.5,8.2,25.2c0.5,2.3,1.2,4.6,1.9,6.8c0.3,0.8-0.1,1.7-0.9,2c-0.8,0.3-1.7-0.1-2-0.9 c-0.8-2.9-1.5-4.9-2.1-7.7C55.2,21,50.9,13.5,48.9,5c-0.1-0.9,0.5-1.6,1.4-1.7C51.1,3.2,51.9,3.8,52,4.7z"/><path fill="#F0C14C" class="st0" d="M60.8,37.5c3.9-0.1,35.8-1.4,37.1,0.7c0.2,0.3,0.1,0.4,0.2,0.7c0,0.6-0.5,1-1.1,0.9c-0.2,0-0.4-0.1-0.6-0.2 c-3.8-0.8-30.4-0.1-35.5,0c-0.6,0-1-0.5-1-1C59.8,38,60.3,37.5,60.8,37.5z"/><path fill="#F0C14C" class="st0" d="M6.2,39c-0.3,0.5-0.5,0.9-0.8,1.4C5.7,40,6,39.5,6.4,39l6.3,0c-0.9,1.9-1.8,3.7-2.6,5.3l-6.6-4.8 c0.1-0.2,0.2-0.4,0.3-0.5L6.2,39L6.2,39z M91.4,39c-1.5,2.7-3.4,5.6-5.1,8.2L68.2,60.3l0.5,1.6c-2.1,3-3.6,5.2-4.1,6.1 c-0.5,0.8-1,1.6-1.5,2.4c-1.7,2.9-3.4,5.8-5,8.8l-6.4-4.6c1.3-2.3,2.6-4.7,3.9-7c0.2-0.5,0.5-1,0.7-1.6c-1.6,2.7-3.2,5.5-4.8,8.4 l-1.3-1l-3,2.2c2-4.3,3.9-8.2,5.8-11.9c-0.8,1.3-1.6,2.6-2.4,3.9c-1.9,3.3-3.9,6.6-5.8,9.8l-5.5,4c1.8-3.6,3.7-7.3,5.7-11.1 l-1.4,2.2c-0.7,1.1-2.8,4.9-5.6,9.8l-4.5,3.3c2.4-4.8,4.9-9.9,7.5-15.1c-0.3,0.4-0.5,0.9-0.7,1.3c-2.1,3.7-5.6,9.4-9.1,15.5 l-6.8,4.9c0.4-0.8,0.7-1.5,1.1-2.1c2.8-5.4,5.9-10.7,9-16c1-2,2-4,3-6c-4.9,8.1-9.7,16.3-13.9,24.7l-2.7,2l11.3-34.5l-0.3-0.2 c1.1-1.9,2.2-3.8,3.4-5.8c4-7.7,8.1-15.3,12.1-22.7c0.5-1,2.5-5,4.9-9.4c0.2-0.4,0.3-0.7,0.5-1.1c-0.8,1.4-1.7,2.8-2.6,4.2 c-5.9,10.9-13.4,23.7-19.2,34L27,56.6c0.9-1.9,1.9-3.7,2.8-5.6c-1.1,1.9-2.2,3.7-3.1,5.4l-2.3-1.7c2.4-5.3,4.9-10.5,7.5-15.7l2.3,0 c-0.2,0.5-0.5,0.9-0.7,1.4l0.8-1.4l4.7,0l5.3-16.4c2.3-3.9,4.5-7.8,6.6-11.7c-1.9,2.8-3.8,5.7-5.6,8.6l4.9-15.1l9,28 c-2.4,4-4.9,8.3-7.2,12.6c2.5-4.2,4.9-8.3,7.3-12.5l1.7,5.2c-4.3,7.4-8.7,15.4-12.9,23.5c4.5-7.4,9-14.8,13.6-22.1l7.6,0 c-1.4,2.2-2.8,4.4-4.1,6.6c1.4-2.1,2.9-4.4,4.5-6.6l8.6,0c-4,6-7.9,11.6-9.6,14c-1.7,2.9-3.4,5.7-5,8.4c1.6-2.5,3.2-4.9,4.9-7.4 c0.5-0.8,4.8-7.2,10.3-15L91.4,39L91.4,39z M71.1,69.2L68.8,62c-2.6,4.4-5.2,8.8-7.6,13.2c-0.9,1.4-1.7,2.8-2.6,4.3l1.8,1.3 c0.8-1.4,1.6-2.9,2.4-4.3c0.2-0.3,0.4-0.6,0.5-0.8c0.9-1.3,2.8-4.1,5.3-7.8c-0.7,1.1-1.4,2.2-2.1,3.3c-1.2,1.9-2.3,3.7-3.3,5.6 c-0.8,1.3-1.7,2.7-2.6,4.2l2,1.4c0.4-0.8,0.8-1.6,1.3-2.3c0.3-0.5,0.6-1,0.9-1.5C66.8,75.4,68.9,72.3,71.1,69.2L71.1,69.2z M63.4,83.1l4,2.9c2-3.1,4-6.2,6.1-9.3l-2-6.2c-1.5,2.3-2.9,4.7-4.3,7C65.9,79.4,64.6,81.2,63.4,83.1L63.4,83.1z M86.7,46.9 l4.3-3.1c1.1-1.7,2.2-3.3,3.3-4.7l-2.3,0C90.5,41.3,88.7,44,86.7,46.9L86.7,46.9z M77.3,88.2l-1.4-4.4c-1,2.1-2.1,4.1-3.1,6.1 l4.9,3.6c0.3-0.5,0.6-0.9,0.9-1.4L77.3,88.2l-0.1,0.1L77.3,88.2L77.3,88.2z M75.3,82.1l-1.6-5c-1.9,3.1-3.8,6.2-5.7,9.3l3.2,2.3 C72.5,86.6,73.9,84.4,75.3,82.1L75.3,82.1z M94.5,39l2.6,0c-0.2,0.2-0.3,0.5-0.5,0.7l-5.1,3.7l0.7-1C92.8,41.5,93.6,40.3,94.5,39 L94.5,39z M97.4,39l0.2,0l-0.5,0.4L97.4,39L97.4,39z M22.8,53.6L22.8,53.6c2.6-4.9,5.3-9.7,8.2-14.5l-3.6,0 c-2.6,3.9-5.1,8-7.5,12.4L22.8,53.6L22.8,53.6z M19.8,51.4c2.3-4.1,4.7-8.2,7.1-12.3l-7.5,0c-1.4,3-2.7,6.1-4,9.2l1.9,1.4 c0.6-1.2,1.2-2.4,1.8-3.6c-0.6,1.2-1.1,2.5-1.7,3.7L19.8,51.4L19.8,51.4z M14.4,47.5c1.6-2.8,3.2-5.6,4.9-8.5l-5.4,0 c-1.1,1.9-2.2,3.8-3.3,5.7L14.4,47.5z"/></g></svg>';
+    } else if (type == "type7") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><path fill="#F0C14C" d="M1.7,1.7V98H98V1.7H1.7z M86.4,46.3L71.5,57.5c-1.7,1.3-2.5,3.6-1.8,5.8l5.7,18.1c1.5,4.7-3.8,8.7-7.7,5.8L52.8,75.9 c-1.7-1.3-4.1-1.3-5.9,0L32,87.1c-3.9,2.9-9.2-1-7.7-5.8L30,63.2c0.7-2.1-0.1-4.4-1.8-5.8c-2.4-1.8-4.8-3.6-7.2-5.4 c-3-2.2-6.8-3.9-9-7c-2.4-3.5,1-7.3,4.7-7.7c5.2-0.5,20.5,3.2,22.7-3.9c0,0,5.6-18,5.7-18.1c1.7-5.4,7.5-4.6,9.4,0.1 c2.7,6.6,2.5,19.3,11.1,21.4c0.3,0.1,0.6,0.1,1,0.2c5.4,0.8,11.4,0,16.9,0C88.3,37,90.3,43.4,86.4,46.3z"/></svg>';
+    } else if (type == "type8") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><style type="text/css"> .st0{fill-rule:evenodd;clip-rule:evenodd;}</style><path fill="#F0C14C" class="st0" d="M49.8,1.7C76.4,1.7,98,23.2,98,49.8C98,76.4,76.4,98,49.8,98C23.2,98,1.7,76.4,1.7,49.8 C1.7,23.2,23.2,1.7,49.8,1.7L49.8,1.7z M49.8,6.6l9.7,30l31.6,0L65.5,55.2l9.8,30L49.8,66.5L24.3,85.2l9.8-30L8.5,36.6l31.6,0 L49.8,6.6z"/></svg>';
+    } else if (type == "type9") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><style type="text/css"> .st0{fill-rule:evenodd;clip-rule:evenodd;}</style><path fill="#F0C14C" class="st0" d="M49.9,2c26.5,0,48,21.5,48,48c0,26.5-21.5,48-48,48c-26.5,0-48-21.5-48-48C1.9,23.5,23.4,2,49.9,2L49.9,2z M53.6,9.2l10.1,21.6l23.7,3c2.2,0.3,3.8,2.3,3.5,4.5c-0.1,1.1-0.6,2-1.4,2.6L72.3,57l4.5,23.5c0.4,2.2-1,4.3-3.2,4.7 c-0.9,0.2-1.9,0-2.7-0.4L49.9,73.3L29,84.8c-1.9,1-4.4,0.3-5.5-1.6c-0.5-0.9-0.6-1.8-0.4-2.7L27.6,57L10.2,40.7 C8.6,39.2,8.5,36.6,10,35c0.6-0.7,1.5-1.1,2.4-1.3l0,0l23.7-3L46.3,9.2c0.9-2,3.4-2.9,5.4-1.9C52.5,7.7,53.2,8.4,53.6,9.2L53.6,9.2z "/></svg>';
+    } else if (type == "type10") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><style type="text/css"> .st0{fill-rule:evenodd;clip-rule:evenodd;}</style><path fill="#F0C14C" class="st0" d="M50,1.7c26.5,0,48,21.5,48,48c0,26.5-21.5,48-48,48S2,76.2,2,49.7C2,23.2,23.5,1.7,50,1.7L50,1.7z M50,8.2 l13.9,22.6L89.6,37L72.4,57.1l2.1,26.4L50,73.4L25.5,83.5l2.1-26.4L10.4,37l25.7-6.2L50,8.2z"/></svg>';
+    } else if (type == "type11") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><style type="text/css"> .st0{fill-rule:evenodd;clip-rule:evenodd;}</style><path fill="#F0C14C" class="st0" d="M46.2,53.8L32.8,35.4l-31.3,4l23,21.6L46.2,53.8z M47.6,80.8V58L25.9,65L20,96L47.6,80.8z M73.6,65L51.9,58 v22.8L79.6,96L73.6,65z M66.7,35.4L53.3,53.8L75,60.9l23-21.6L66.7,35.4z M36.4,32.8l13.4,18.5l13.4-18.5L49.8,4.3L36.4,32.8z"/></svg>';
+    } else if (type == "type12") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><style type="text/css"> .st0{fill-rule:evenodd;clip-rule:evenodd;}</style><path fill="#F0C14C" class="st0" d="M63.5,25.9l-0.5-2.2c-1.7-7.3-5.9-19.9-13.3-19.9c-7.3,0-11.6,12.6-13.3,19.9l-0.3,1.5l-0.4,2.2l-0.4,2.3 L35,32.1l-0.2,1.6c-5-1-9.8-1.5-14.1-1.7l-3.9,0L15,32.2c-0.4,0-0.8,0.1-1.1,0.1l-2.7,0.4l-1.5,0.4l-1.3,0.4l-0.4,0.1l-0.4,0.2 l-1.2,0.5l-0.4,0.2l-0.7,0.4l-0.6,0.4L4,35.7L3.7,36l-0.9,1l-0.4,0.5c-0.7,1.2-0.9,2.5-0.8,3.8c0,0.4,0.1,0.7,0.2,1.1L2,43.1 l0.6,1.5c2.8,5.7,11.4,12.3,23,17.6L24,65L23,67.1l-1,2.1c-2.2,4.8-8.7,20.9-1.8,25.9c3.4,2.4,8.2,0.8,11.5-0.8l1.5-0.8l2-1.1l2-1.4 c3.5-2.4,6.8-5.3,9.8-8.3l1.1-1.1l1.7-1.7c11.8,12.8,24,19.4,29.6,15.3c8.3-6-1.6-26.2-5.4-32.9c11.9-5.4,20.5-12.1,23.1-18 c0.3-0.7,0.6-1.4,0.7-2.2l0.1-1c0-0.9,0-1.5-0.3-2.3c-2.2-6.7-15.9-8.4-32.9-5.1l-0.2-1.6l-0.2-1.6l-0.4-2.3L63.5,25.9z"/></svg>';
+    } else if (type == "type13") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><style type="text/css"> .st0{fill-rule:evenodd;clip-rule:evenodd;}</style><path fill="#F0C14C" class="st0" d="M52.1,4v46.6l44.4-14.4l-29.7-3.8l-1.3-0.2l-0.6-1.3L52.1,4z M98,40.9L53.6,55.4L81,93.1l-5.6-29.4l-0.2-1.3 l1-0.9L98,40.9z M77,96L49.6,58.3L22.2,96l26.2-14.4l1.2-0.7l1.2,0.7L77,96z M1.2,40.9l21.8,20.5l1,0.9l-0.3,1.3l-5.6,29.4 l27.4-37.7L1.2,40.9z M2.8,36.2l44.4,14.4V4L34.4,31.1l-0.6,1.3l-1.4,0.2L2.8,36.2z"/></svg>';
+    } else if (type == "type14") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><path fill="#F0C14C" d="M51.1,7.6L64,34.9l30,3.8l3.9,0.5L95,41.8L73,62.5l5.7,29.7l0.7,3.8L76,94.1L49.5,79.5L23,94.1L19.6,96l0.7-3.8L26,62.5 L4,41.8l-2.8-2.7L5,38.7l30-3.8L47.9,7.6L49.5,4L51.1,7.6z M63.6,38.5L52.4,53.9l18.1,5.9l19.2-18L63.6,38.5z M49.5,51.8l11.2-15.4 L49.5,12.6L38.3,36.4L49.5,51.8z M47.7,76.4v-19l-18.1,5.9l-4.9,25.8L47.7,76.4z M69.4,63.3l-18.1-5.9v19l23,12.7L69.4,63.3z M28.5,59.8l18.1-5.9L35.4,38.5L9.3,41.8L28.5,59.8z"/></svg>';
+    } else if (type == "type15") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><style type="text/css"> .st0{fill-rule:evenodd;clip-rule:evenodd;}</style><path fill="#F0C14C" class="st0" d="M53.9,5.8l12,25.5l28,3.6c2.6,0.3,4.5,2.7,4.2,5.3c-0.2,1.3-0.8,2.3-1.7,3.1L76,62.4l5.3,27.8 c0.5,2.6-1.2,5.1-3.8,5.6c-1.1,0.2-2.3,0-3.2-0.5L49.6,81.6L24.8,95.2c-2.3,1.3-5.2,0.4-6.5-1.9c-0.6-1-0.7-2.1-0.5-3.2l5.3-27.8 L2.5,43.1c-1.9-1.8-2-4.8-0.2-6.8c0.8-0.8,1.8-1.3,2.9-1.5l0,0l28-3.6l12-25.5c1.1-2.4,4-3.4,6.4-2.3C52.6,3.9,53.4,4.8,53.9,5.8 L53.9,5.8z M49.6,13.7L38.2,38l-24.7,3.1v0l-2,0.2l19.6,18.4L26,86.2l23.6-12.9l23.6,12.9l-5.1-26.4l19.6-18.4L61,38L49.6,13.7z M9.3,38L9.3,38l-3.7,0.4c-0.2,0-0.5,0.2-0.7,0.4C4.5,39.3,4.5,40,5,40.4l22,20.7l-5.7,29.7c0,0.3,0,0.5,0.1,0.8 c0.3,0.5,1,0.7,1.5,0.4l26.5-14.6L76.1,92c0.2,0.1,0.5,0.2,0.7,0.1c0.6-0.1,1-0.7,0.9-1.3l-5.7-29.7L94,40.5l0.1-0.1 c0.2-0.2,0.4-0.4,0.4-0.7c0.1-0.6-0.4-1.2-1-1.3l-30-3.8L50.6,7.3c-0.1-0.2-0.3-0.4-0.5-0.5c-0.6-0.3-1.3,0-1.5,0.5L35.7,34.7 L9.3,38z"/></svg>';
+    } else if (type == "type16") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><style type="text/css"> .st0{fill-rule:evenodd;clip-rule:evenodd;}</style><path fill="#F0C14C" class="st0" d="M49.9,3.4l11.4,35.4l37.2-0.1L68.4,60.6L79.9,96L49.9,74.1L19.8,96l11.6-35.4L1.2,38.8l37.2,0.1L49.9,3.4z M49.9,21.8l-7.3,22.7l-23.9-0.1l19.3,14l-7.4,22.7l19.3-14.1l19.3,14.1l-7.4-22.7l19.3-14l-23.8,0.1L49.9,21.8z M49.9,12.6l-9.4,29 L9.9,41.6l24.7,17.9l-9.5,29l24.7-18l24.7,18l-9.5-29l24.8-17.9l-30.6,0.1L49.9,12.6z"/></svg>';
+    } else if (type == "type17") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><style type="text/css"> .st0{fill-rule:evenodd;clip-rule:evenodd;}</style><path fill="#F0C14C" class="st0" d="M55.1,7l13.4,21.8l25.3,6.1c3.3,0.8,5.2,4.1,4.5,7.3c-0.2,1-0.7,1.8-1.3,2.5l0,0L80.1,64.5l2,25.9 c0.3,3.4-2.2,6.3-5.6,6.5c-1.1,0.1-2.2-0.2-3.1-0.6l-23.7-9.8l-24,9.9c-3.1,1.3-6.7-0.2-7.9-3.3c-0.4-0.9-0.5-1.8-0.4-2.8l0,0 l2-25.9L2.4,44.8c-2.2-2.5-1.9-6.4,0.7-8.6c0.8-0.7,1.8-1.1,2.8-1.3l25-6L44.5,6.7c1.8-2.9,5.5-3.8,8.4-2C53.8,5.2,54.6,6.1,55.1,7 L55.1,7z M49.7,14.4L36.3,36.3l-24.8,6L28,61.7l-1.9,24.7l0,0.8l23.6-9.8l23.6,9.8l-2-25.5l13.6-16l0,0l2.9-3.5l-24.8-6L49.7,14.4z M21.8,86.5L21.8,86.5l-0.3,4.2c0,0.3,0,0.5,0.2,0.8c0.4,0.9,1.4,1.4,2.3,1L49.7,82l25.4,10.5l0.1,0.1c0.3,0.2,0.6,0.2,0.9,0.2 c1-0.1,1.8-1,1.7-2l-2.1-27.7l15.2-17.9l0,0l2.8-3.2c0.2-0.2,0.3-0.5,0.4-0.7c0.2-1-0.4-2-1.3-2.2l-26.9-6.5L51.4,9.1l0-0.1 c-0.2-0.3-0.4-0.5-0.7-0.7c-0.9-0.5-2-0.2-2.5,0.6L33.6,32.5L6.8,39H6.7c-0.3,0.1-0.6,0.2-0.8,0.4C5.1,40.1,5,41.2,5.7,42l18,21.1 L21.8,86.5z"/></svg>';
+    } else if (type == "type18") {
+         var starRatingIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Star_x5F_5" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve"><style type="text/css"> .st0{fill-rule:evenodd;clip-rule:evenodd;}</style><path fill="#F0C14C" class="st0" d="M67.8,29.4L89.1,32c5.6,0.7,9.5,5.8,8.9,11.4c-0.3,2.5-1.5,4.8-3.4,6.5L79.2,64.3l4,21c1,5.6-2.6,10.9-8.1,12 c-2.3,0.4-4.8,0-6.8-1.1L49.5,85.8L30.8,96.2c-5,2.7-11.2,0.9-13.9-4.1c-1.1-2.1-1.5-4.5-1.1-6.8l4-21L4.2,49.7 c-4.2-3.9-4.3-10.4-0.5-14.5c1.6-1.7,3.8-2.8,6.2-3.1l21.2-2.7L40.2,10c2.4-5.1,8.5-7.3,13.6-4.9c2.2,1,3.9,2.8,5,4.9L67.8,29.4z M53.3,12.6l10.5,22.3L88.3,38c2.3,0.3,3.9,2.4,3.6,4.7c-0.2,1.1-0.7,2-1.5,2.7L72.6,62.1l4.7,24.2c0.4,2.3-1.1,4.5-3.3,4.9 c-1,0.2-2,0-2.8-0.4L49.5,78.9L27.9,90.8c-2,1.1-4.6,0.4-5.7-1.7c-0.5-0.9-0.6-1.9-0.4-2.8l4.7-24.2L8.4,45.2 c-1.7-1.6-1.8-4.2-0.2-5.9c0.7-0.7,1.6-1.2,2.5-1.3l24.5-3.1l10.5-22.3c1-2.1,3.5-3,5.6-2C52.2,11,52.9,11.7,53.3,12.6L53.3,12.6z M65.8,32.2L88.7,35c4,0.5,6.8,4.1,6.3,8c-0.2,1.8-1.1,3.4-2.5,4.6L75.9,63.2l4.3,22.6c0.8,3.9-1.8,7.7-5.7,8.4 c-1.6,0.3-3.4,0-4.8-0.8L49.5,82.4L29.3,93.5c-3.5,1.9-7.9,0.6-9.8-2.8c-0.8-1.5-1.1-3.2-0.8-4.8l4.3-22.6L6.3,47.4 c-2.9-2.7-3-7.3-0.3-10.2c1.2-1.2,2.7-2,4.4-2.2l22.9-2.9L43,11.3c1.7-3.6,6-5.1,9.5-3.4c1.6,0.7,2.8,1.9,3.5,3.4L65.8,32.2z"/></svg>';
+    }
+    return starRatingIcon;
+
+  } 
+
+  setting();
+  appendData(); 
+  owlSlider();
+
+  function ScrollBottom(){
+    $t = $('.item-content'); 
+    $t.scroll(function(){      	
+        if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+          $(this).parent().addClass('scroll_reach_bottom');
+        } else {
+          $(this).parent().removeClass('scroll_reach_bottom');
+        }
+    });
+  }
+
+  $(document).ready(function(){
+    ScrollBottom(); 
+    $('.starRating-Wrapper').click(function(){
+      document.getElementById('review_body_1010_type2').scrollIntoView({behavior: "smooth"})
+    });
+    
+    var svgHeight = $(".reviewPage-topSvg").height();
+    $(".reviewSlider-Wrapper").css("margin-top", svgHeight);
+    
+  });
+
+  $(document).on('click', '.item-content-scroll-btn', function(event) {
+    $target = $(this).parent().parent().find('.item-content');
+  });
+
+</script>  
+<!-- End -->
